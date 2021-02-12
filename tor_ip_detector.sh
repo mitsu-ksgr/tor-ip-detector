@@ -51,6 +51,8 @@ Options:
     -s  do not write anything to standard output.
         exit immediately with zero status.
         if tor IP detected, exit status will be 1.
+    -p  output only the tor IP detected.
+        if the -s flag is also specified, the -s flag will take precedence.
 
 Options for dev:
     -b  download the tor exit node list from $URL_TOR_EXIT_NODE_LIST.
@@ -64,6 +66,7 @@ __EOS__
 #
 OPT_PATH_TOR_EXIT_NODE_LIST=
 OPT_SILENT_MODE=false
+OPT_OUTPUT_ONLY_TOR_IP=false
 
 
 #
@@ -102,7 +105,7 @@ download_tor_exit_node_list() {
 
 
 parse_args() {
-    while getopts hl:sb flag; do
+    while getopts hl:spb flag; do
         case "${flag}" in
             h )
                 usage
@@ -117,6 +120,9 @@ parse_args() {
                 OPT_SILENT_MODE=true
                 ;;
 
+            p )
+                OPT_OUTPUT_ONLY_TOR_IP=true
+                ;;
 
             #
             # Options for development.
@@ -176,14 +182,21 @@ main() {
 
         if [ $ret -eq 1 ]; then :
         else
-            echos "Tor IP Detected: $line"
+            if [ "$OPT_OUTPUT_ONLY_TOR_IP" = "true" ]; then
+                echos "$line"
+            else
+                echos "Tor IP Detected: $line"
+            fi
             detect_count=`expr $detect_count + 1`
         fi
         check_count=`expr $check_count + 1`
     done < "${path_ip_list:-/dev/stdin}"
 
     if [ $detect_count -ne 0 ]; then
-        echos "Tor IP: $detect_count / $check_count"
+        if [ "$OPT_OUTPUT_ONLY_TOR_IP" = "true" ]; then :
+        else
+            echos "Tor IP: $detect_count / $check_count"
+        fi
 
         # if silent mode, exit with 1
         if [ "$OPT_SILENT_MODE" = "true" ]; then

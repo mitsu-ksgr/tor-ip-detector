@@ -44,6 +44,15 @@ else
     ng "NG! ip_list_contain_tor_ip.txt is contain Tor IP. but not detected."
 fi
 
+test_p_option() {
+    local result=$($TARGET -p -l $PATH_TENL ./ip_list_contain_tor_ip.txt | wc -l)
+    if [ "$result" -eq "19" ]; then
+        ok
+    else
+        ng "NG! test_p_option() ... ip_list_contain_tor_ip.txt contain 19 tor ip, but $result ip detected."
+    fi
+}
+test_p_option
 
 #
 # Result
