@@ -53,6 +53,8 @@ Options:
         if tor IP detected, exit status will be 1.
     -p  output only the tor IP detected.
         if the -s flag is also specified, the -s flag will take precedence.
+    -q  output only the IP address that are not Tor IP.
+        if the -s flag is also specified, the -s flag will take precedence.
 
 Options for dev:
     -b  download the tor exit node list from $URL_TOR_EXIT_NODE_LIST.
@@ -67,6 +69,7 @@ __EOS__
 OPT_PATH_TOR_EXIT_NODE_LIST=
 OPT_SILENT_MODE=false
 OPT_OUTPUT_ONLY_TOR_IP=false
+OPT_OUTPUT_ONLY_NOT_TOR_IP=false
 
 
 #
@@ -105,7 +108,7 @@ download_tor_exit_node_list() {
 
 
 parse_args() {
-    while getopts hl:spb flag; do
+    while getopts hl:spqb flag; do
         case "${flag}" in
             h )
                 usage
@@ -122,6 +125,9 @@ parse_args() {
 
             p )
                 OPT_OUTPUT_ONLY_TOR_IP=true
+                ;;
+            q )
+                OPT_OUTPUT_ONLY_NOT_TOR_IP=true
                 ;;
 
             #
@@ -181,11 +187,16 @@ main() {
         ret=$?
 
         if [ $ret -eq 1 ]; then :
+            if [ "$OPT_OUTPUT_ONLY_NOT_TOR_IP" = "true" ]; then
+                echos "$line"
+            fi
         else
             if [ "$OPT_OUTPUT_ONLY_TOR_IP" = "true" ]; then
                 echos "$line"
             else
-                echos "Tor IP Detected: $line"
+                if [ "$OPT_OUTPUT_ONLY_NOT_TOR_IP" = "false" ]; then
+                    echos "Tor IP Detected: $line"
+                fi
             fi
             detect_count=`expr $detect_count + 1`
         fi
@@ -193,7 +204,9 @@ main() {
     done < "${path_ip_list:-/dev/stdin}"
 
     if [ $detect_count -ne 0 ]; then
-        if [ "$OPT_OUTPUT_ONLY_TOR_IP" = "true" ]; then :
+        if [ "$OPT_OUTPUT_ONLY_TOR_IP" = "true" ] || \
+           [ "$OPT_OUTPUT_ONLY_NOT_TOR_IP" = "true" ]\
+           ; then :
         else
             echos "Tor IP: $detect_count / $check_count"
         fi

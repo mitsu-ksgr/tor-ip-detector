@@ -54,6 +54,16 @@ test_p_option() {
 }
 test_p_option
 
+test_q_option() {
+    local result=$($TARGET -q -l $PATH_TENL ./ip_list_contain_tor_ip.txt | wc -l)
+    if [ "$result" -eq "1000" ]; then
+        ok
+    else
+        ng "NG! test_q_option() ... ip_list_contain_tor_ip.txt contain 1000 (no tor) ip, but $result ip listed."
+    fi
+}
+test_q_option
+
 #
 # Result
 #
