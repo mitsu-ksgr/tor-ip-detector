@@ -58,6 +58,8 @@ Options:
 
 Options for dev:
     -b  download the tor exit node list from $URL_TOR_EXIT_NODE_LIST.
+        if you want to suppress output to stdout, specify -s option before
+        -b option.
 
 __EOS__
 }
@@ -136,7 +138,7 @@ parse_args() {
             b )
                 download_tor_exit_node_list
                 cp $PATH_TOR_EXIT_NODE_LIST ./
-                echo "output: ./$(basename $PATH_TOR_EXIT_NODE_LIST)"
+                echos "output: ./$(basename $PATH_TOR_EXIT_NODE_LIST)"
                 exit 0
                 ;;
 
